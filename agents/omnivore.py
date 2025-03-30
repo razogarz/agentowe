@@ -31,6 +31,7 @@ class Carnivore(mesa.Agent):
         pass
 
     def breed(self):
+        print("TEST")
         pass
 
 
