@@ -2,26 +2,10 @@
 ## **Grid (World) Parameters**
 
 - **Size**: 750x750 cells
-    
-- **Resource Types**: Grass, Meat
-    
-- **Max Resources per Cell**:
-    
-    - `maxGrass = 100`
-        
-    - `maxMeat = 50`
         
 - **Grass Growth**:
     
     - `probaGrass = 0.3` (Initial probability of grass in a cell)
-        
-    - `growGrass = 5` (Grass regrowth per time step)
-        
-    - `probaGrowGrass = 0.1` (Chance of grass spreading from neighboring cells)
-        
-- **Meat Decay**:
-    
-    - `decreaseMeat = 2` (Meat decays over time per step)
         
 - **Initial Distribution**: Clustered distribution of individuals
     
