@@ -1,65 +1,62 @@
 import mesa
 
-from models.agents.herbivore import Herbivore
-from models.agents.carnivore import Carnivore
-from models.grid import Grid
+from models.agents.herbivore import Herbivore, Grass
 
 
 class PPModel(mesa.Model):
     def __init__(
             self,
-            initial_herbivores=100,
-            initial_carnivores=50,
+            initial_herbivores=30,
             max_energy_prey=100,
-            max_energy_predator=150,
             age_interbreed_prey=10,
-            age_interbreed_predator=15,
             max_speed_prey=5,
-            max_speed_predator=7,
             energy_grass=20,
-            energy_meat=50,
             reproduction_threshold_prey=15,
-            reproduction_threshold_predator=20,
+            width=75,
+            height=75,
             seed=None
     ):
+        # Setup simulation
         super().__init__(seed=seed)
+        self.num_agents = initial_herbivores
+        self.grid = mesa.space.MultiGrid(width, height, True)
 
+        # Simulation parameters
         self.max_energy_prey = max_energy_prey
-        self.max_energy_predator = max_energy_predator
         self.age_interbreed_prey = age_interbreed_prey
-        self.age_interbreed_predator = age_interbreed_predator
         self.max_speed_prey = max_speed_prey
-        self.max_speed_predator = max_speed_predator
         self.energy_grass = energy_grass
-        self.energy_meat = energy_meat
         self.reproduction_threshold_prey = reproduction_threshold_prey
-        self.reproduction_threshold_predator = reproduction_threshold_predator
 
-        herbivores = Herbivore.create_agents(self, initial_herbivores)
-        carnivores = Carnivore.create_agents(self, initial_carnivores)
+        # Create agents
+        agents = Herbivore.create_agents(self, initial_herbivores)
 
-    def perception(self):
-        self.agents.shuffle_do("perceive")
+        x = self.rng.integers(0, self.grid.width, size=(initial_herbivores,))
+        y = self.rng.integers(0, self.grid.height, size=(initial_herbivores,))
+        for a, i, j in zip(agents, x, y):
+            self.grid.place_agent(a, (i, j))
 
-    def concept_computation(self):
-        pass
+        # Datacollector
+        self.datacollector = mesa.DataCollector(
+            model_reporters={
+                "Herbivore": lambda m: m.num_agents,
+            },
+            agent_reporters={
+                "Energy": "energy",
+                "Age": "age",
+            },
+        )
 
-    def action(self):
-        pass
-
-    def energy_update(self):
-        pass
-
-    def population_update(self):
-        pass
-
-    def resource_update(self):
-        pass
-
-    def aging(self):
-        for agent in self.agents:
-            agent.age += 1
+    def grow_grass(self):
+        has_grass_grown = self.rng.random() < 0.35
+        if has_grass_grown:
+            grass = Grass.create_agents(self, 2)
+            x = self.rng.integers(0, self.grid.width, size=(2,))
+            y = self.rng.integers(0, self.grid.height, size=(2,))
+            for g_a, i, j in zip(grass, x, y):
+                self.grid.place_agent(g_a, (i, j))
 
     def step(self):
-        steps = self.agents.shuffle_do("step")
-
+        self.datacollector.collect(self)
+        self.agents.shuffle_do("step")
+        self.grow_grass()
