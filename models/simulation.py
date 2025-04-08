@@ -1,6 +1,7 @@
 import mesa
 
 from models.agents.herbivore import Herbivore, Grass
+from models.visualize_grid import visualize_grid
 
 
 class PPModel(mesa.Model):
@@ -39,12 +40,11 @@ class PPModel(mesa.Model):
         # Datacollector
         self.datacollector = mesa.DataCollector(
             model_reporters={
-                "Herbivore": lambda m: m.num_agents,
+                "Coverage of land": compute_grass_coverage,
             },
             agent_reporters={
-                "Energy": "energy",
-                "Age": "age",
-            },
+                "population": "num_agents",
+            }
         )
 
     def grow_grass(self):
@@ -60,3 +60,9 @@ class PPModel(mesa.Model):
         self.datacollector.collect(self)
         self.agents.shuffle_do("step")
         self.grow_grass()
+
+def compute_grass_coverage(model):
+    """Compute the percentage of herbivores in the model."""
+    num_of_grass = len([a for a in model.agents if isinstance(a, Grass)])
+    area = model.grid.width * model.grid.height
+    return num_of_grass / area * 100
