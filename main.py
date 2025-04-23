@@ -3,7 +3,9 @@ import sys
 import time
 import numpy as np
 from models.simulation import PPModel  # Import your Mesa model
-from models.agents.herbivore import Grass, Herbivore  # Import your agent classes
+from models.agents.grass import Grass  # Updated import
+from models.agents.herbivore import Herbivore  # Updated import
+from models.agents.predator import Predator  # Import the predator class
 
 # Simulation parameters
 GRID_CELL_SIZE = 10  # Size (in pixels) for each grid cell.
@@ -14,7 +16,10 @@ WINDOW_MARGIN = 20  # Margin around the grid display.
 def draw_grid(screen, model):
     """
     Draws the grid, coloring each cell's background based on grass count
-    and drawing herbivore agents as red circles.
+    and drawing agents as colored circles:
+    - Herbivores: blue circles
+    - Predators: red circles
+    - Grass: green background
     """
     width, height = model.grid.width, model.grid.height
 
@@ -24,9 +29,10 @@ def draw_grid(screen, model):
             # Get agents in the cell:
             cell_agents = model.grid.get_cell_list_contents((x, y))
 
-            # Count Grass and Herbivores
+            # Count Grass, Herbivores, and Predators
             num_grass = sum(1 for agent in cell_agents if isinstance(agent, Grass))
             num_herbivores = sum(1 for agent in cell_agents if isinstance(agent, Herbivore))
+            num_predators = sum(1 for agent in cell_agents if isinstance(agent, Predator))
 
             # Determine cell color: base black, then add green if grass is present.
             # The more grass agents, the brighter the green (capped at full green).
@@ -40,20 +46,32 @@ def draw_grid(screen, model):
 
             pygame.draw.rect(screen, cell_color, rect)
 
-            # If there are herbivores, draw a red circle in the center of the cell.
+            # Draw herbivores as blue circles
             if num_herbivores > 0:
                 center = (WINDOW_MARGIN + x * GRID_CELL_SIZE + GRID_CELL_SIZE // 2,
                           WINDOW_MARGIN + y * GRID_CELL_SIZE + GRID_CELL_SIZE // 2)
                 radius = GRID_CELL_SIZE // 2 - 1
-                pygame.draw.circle(screen, (255, 0, 0), center, radius)
+                pygame.draw.circle(screen, (0, 0, 255), center, radius)  # Blue for herbivores
+
+            # Draw predators as red circles (on top of herbivores if both present)
+            if num_predators > 0:
+                center = (WINDOW_MARGIN + x * GRID_CELL_SIZE + GRID_CELL_SIZE // 2,
+                          WINDOW_MARGIN + y * GRID_CELL_SIZE + GRID_CELL_SIZE // 2)
+                radius = GRID_CELL_SIZE // 2 - 1
+                pygame.draw.circle(screen, (255, 0, 0), center, radius)  # Red for predators
 
             # Draw grid cell border for clarity.
             pygame.draw.rect(screen, (40, 40, 40), rect, 1)
 
 
 def run_interactive_simulation():
-    # Initialize Mesa model with appropriate parameters.
-    model = PPModel(initial_herbivores=30, width=75, height=75)
+    # Initialize Mesa model with balanced parameters
+    model = PPModel(
+        initial_herbivores=30,  # Fewer herbivores
+        initial_predators=5,    # Fewer predators
+        width=75, 
+        height=75
+    )
 
     # Initialize Pygame.
     pygame.init()
@@ -62,7 +80,7 @@ def run_interactive_simulation():
     window_height = grid_height * GRID_CELL_SIZE + 2 * WINDOW_MARGIN
 
     screen = pygame.display.set_mode((window_width, window_height))
-    pygame.display.set_caption("Interactive Agent Simulation")
+    pygame.display.set_caption("Predator-Prey Simulation")
 
     clock = pygame.time.Clock()
 
