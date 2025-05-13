@@ -101,19 +101,19 @@ class PPModel(mesa.Model):
         # Calculate current grass coverage as a percentage
         current_grass_coverage = self.compute_grass_coverage()
         
-        # Adaptive grass growth - faster when grass is scarce, slower when plentiful
+        # Adaptive grass growth - SLOWED DOWN by reducing all probabilities and patch counts
         if current_grass_coverage < 10:
-            # Very little grass, grow more rapidly
-            growth_chance = 0.4
-            max_new_patches = 6
+            # Very little grass, grow more rapidly but slower than before
+            growth_chance = 0.2  # Reduced from 0.4
+            max_new_patches = 3  # Reduced from 6
         elif current_grass_coverage < 20:
-            # Moderate grass, normal growth
-            growth_chance = 0.25
-            max_new_patches = 3
+            # Moderate grass, normal growth but slower
+            growth_chance = 0.15  # Reduced from 0.25
+            max_new_patches = 2  # Reduced from 3
         else:
-            # Lots of grass, slow growth
-            growth_chance = 0.15
-            max_new_patches = 1
+            # Lots of grass, very slow growth
+            growth_chance = 0.08  # Reduced from 0.15
+            max_new_patches = 1  # Unchanged, already minimal
             
         # Try to grow grass based on current coverage
         if self.random.random() < growth_chance:
@@ -121,7 +121,7 @@ class PPModel(mesa.Model):
             for _ in range(num_new_grass):
                 # Try to find an empty spot for new grass
                 # More attempts in sparse environments, fewer in dense ones
-                max_tries = 5
+                max_tries = 3  # Reduced from 5 for further slowing
                 for _ in range(max_tries):
                     x = self.random.randrange(self.grid.width)
                     y = self.random.randrange(self.grid.height)

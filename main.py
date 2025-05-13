@@ -156,7 +156,7 @@ def plot_simulation_data(model, save_plots=False, data_file=None):
     plt.grid(True)
     
     # Add overall title
-    plt.suptitle('Predator-Prey Simulation Results', fontsize=16)
+    plt.suptitle('Predator-Prey Simulation Results (Fuzzy Logic)', fontsize=16)
     plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust for suptitle
     
     # Calculate and display summary statistics
@@ -209,12 +209,12 @@ def plot_simulation_data(model, save_plots=False, data_file=None):
 
 
 def run_interactive_simulation():
-    # Initialize Mesa model with balanced parameters
+    # Initialize Mesa model with balanced parameters for fuzzy logic agents
     model = PPModel(
-        initial_herbivores=30,  # Fewer herbivores
-        initial_predators=5,    # Fewer predators
-        width=75, 
-        height=75
+        initial_herbivores=50,  # Increased from 40 - start with more herbivores
+        initial_predators=6,    # Reduced from 8 - fewer predators at start
+        width=80, 
+        height=80  # Larger grid for better observation of dynamics
     )
 
     # Initialize Pygame.
@@ -224,7 +224,7 @@ def run_interactive_simulation():
     window_height = grid_height * GRID_CELL_SIZE + 2 * WINDOW_MARGIN
 
     screen = pygame.display.set_mode((window_width, window_height))
-    pygame.display.set_caption("Predator-Prey Simulation")
+    pygame.display.set_caption("Predator-Prey Simulation with Fuzzy Logic")
 
     clock = pygame.time.Clock()
 
@@ -236,6 +236,7 @@ def run_interactive_simulation():
     print("Space: Pause/Step simulation")
     print("S: Save current simulation data to CSV")
     print("Q: Quit simulation and show plots")
+    print("\nSimulation uses fuzzy logic for agent decision making")
 
     while running:
         # Process Pygame events.
@@ -273,6 +274,15 @@ def run_interactive_simulation():
         font = pygame.font.SysFont('Arial', 16)
         text = font.render(f"Step: {step_count} | {'PAUSED' if step_mode else 'RUNNING'}", True, (255, 255, 255))
         screen.blit(text, (10, 5))
+        
+        # Draw population counts
+        herb_count = model.compute_herbivore_population()
+        pred_count = model.compute_predator_population()
+        grass_pct = model.compute_grass_coverage()
+        
+        count_text = font.render(f"Herbivores: {herb_count} | Predators: {pred_count} | Grass: {grass_pct:.1f}%", 
+                                True, (255, 255, 255))
+        screen.blit(count_text, (10, window_height - 25))
         
         # Update the display
         pygame.display.flip()

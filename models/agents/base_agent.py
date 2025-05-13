@@ -9,6 +9,7 @@ class Animal(mesa.Agent):
         self.energy = energy
         self.max_energy = max_energy
         self.steps_without_food = 0
+        self.blocks_movement = True  # Animals block movement of other animals
     
     def _check_position(self):
         """Check if the agent has a valid position on the grid"""
